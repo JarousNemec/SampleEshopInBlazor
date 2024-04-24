@@ -1,0 +1,11 @@
+version: "3.6"
+
+services:
+  eshop:
+    build:
+      context: .
+      dockerfile: Eshop/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ESHOP_MODE=dev

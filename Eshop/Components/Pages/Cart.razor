@@ -1,0 +1,29 @@
+﻿@page "/Cart"
+@using Eshop.Services
+@inject CartService CartService
+@rendermode InteractiveServer
+
+<h3>Cart</h3>
+<div>
+    @foreach (var item in CartService.Items)
+    {
+        <ProductInCartComponent CartItem="item"></ProductInCartComponent>
+    }
+</div>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CartService.OnCartChanged += CartServiceOnOnCartChanged;
+        }
+    }
+
+    private void CartServiceOnOnCartChanged()
+    {
+        StateHasChanged();
+    }
+
+}
+

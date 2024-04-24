@@ -1,0 +1,46 @@
+﻿@using Eshop.Models
+@using Eshop.Services
+@inject CartService CartService
+@inject NavigationManager NavManager
+@rendermode InteractiveServer
+
+<span @onclick="Click">Card(@_count)</span>
+
+@code {
+    private int _count;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            PrepareCount();
+            CartService.OnAddedItem += CartServiceOnAddedItem;
+            CartService.OnCartChanged += CartServiceOnOnCartChanged;
+        }
+    }
+
+    private void CartServiceOnOnCartChanged()
+    {
+        PrepareCount();
+    }
+
+    private void CartServiceOnAddedItem(ProductInCart item)
+    {
+        PrepareCount();
+    }
+
+    private void PrepareCount()
+    {
+        _count = 0;
+        foreach (var item in CartService.Items)
+        {
+            _count += item.Count;
+        }
+        StateHasChanged();
+    }
+
+    private void Click()
+    {
+        NavManager.NavigateTo("/Cart");
+    }
+}

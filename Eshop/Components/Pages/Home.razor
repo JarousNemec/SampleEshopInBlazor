@@ -1,0 +1,38 @@
+﻿@page "/"
+@using Eshop.Services
+@using Eshop.Models
+@using Microsoft.EntityFrameworkCore.Query
+@inject ProductService ProductService
+@inject CartService CartService
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<div class="row">
+    @foreach (var product in ProductService.Products)
+    {
+        <div class="col-4">
+            <ProductComponent Product="product"></ProductComponent>
+        </div>
+    }
+</div>
+
+@code
+{
+    private ProductInCart? _lastAdded;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            CartService.OnAddedItem += CartServiceOnAddedItem;
+        }
+    }
+
+    private void CartServiceOnAddedItem(ProductInCart item)
+    {
+        _lastAdded = item;
+        
+        StateHasChanged();
+    }
+}

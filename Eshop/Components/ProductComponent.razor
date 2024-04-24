@@ -1,0 +1,21 @@
+﻿@using Eshop.Models
+@using Eshop.Services
+@inject CartService CartService
+
+<b>@Product.Name</b>
+<img class="img-fluid" src="@Product.ImageLink"/>
+
+<input type="number" @bind="count" class="form-control"/>
+
+<button class="btn" @onclick="AddToCard">Add</button>
+
+@code {
+    [Parameter] public Product Product { get; set; }
+    private int count = 1;
+
+    private void AddToCard()
+    {
+        CartService.Add(Product, count);
+    }
+
+}

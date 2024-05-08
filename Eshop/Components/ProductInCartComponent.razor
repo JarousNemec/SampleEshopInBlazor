@@ -1,24 +1,28 @@
 ﻿@using Eshop.Models
-@using Eshop.Services
-@inject CartService CartService
+@using Eshop.Lib.Interfaces
+@using Microsoft.AspNetCore.Identity
+@inject ICartService CartService
+@inject IHttpContextAccessor Context
 
 <b>@CartItem.Product.Name</b>
 <img class="img-fluid" src="@CartItem.Product.ImageLink"/>
-@* <input type="number" @onchange="@ChangeCount" @bind="_count" class="form-control"/> *@
-<InputNumber TValue="int" Value="CartItem.Count" ValueExpression="() => CartItem.Count" ValueChanged="(value) => ChangeCount(value)" Placeholder="Enter price" />
+<InputNumber TValue="int" Value="CartItem.Count" ValueExpression="() => CartItem.Count" ValueChanged="(value) => ChangeCount(value)" Placeholder="Enter price"/>
 <button class="btn btn-danger" @onclick="RemoveFromCard">X</button>
 
 @code {
     [Parameter] public ProductInCart CartItem { get; set; }
-     
+
     private void RemoveFromCard()
     {
-        CartService.Remove(CartItem.Product.Id);
+        CartService.Remove(CartItem.Product.Id,Context.HttpContext.User);
     }
 
     private void ChangeCount(int value)
     {
-        CartService.ChangeCount(CartItem.Product, value);
+        if (value < 1)
+            RemoveFromCard();
+        else
+            CartService.ChangeCount(CartItem.Product, value,Context.HttpContext.User);
     }
 
 }

@@ -1,9 +1,7 @@
-﻿@using Eshop.Models
-@using Eshop.Lib.Interfaces
-@using Microsoft.AspNetCore.Identity
+﻿@using Eshop.Lib.Interfaces
+@using Eshop.Models
 @inject ICartService CartService
 @inject NavigationManager NavManager
-@inject IHttpContextAccessor Context
 @rendermode InteractiveServer
 
 <span @onclick="Click">Card(@_count)</span>
@@ -34,7 +32,7 @@
     private void PrepareCount()
     {
         _count = 0;
-        foreach (var item in CartService.GetItems(Context.HttpContext.User))
+        foreach (var item in CartService.GetItems())
         {
             _count += item.Count;
         }

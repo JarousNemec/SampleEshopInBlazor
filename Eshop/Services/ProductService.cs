@@ -1,14 +1,15 @@
-﻿using Eshop.Models;
+﻿using Eshop.Lib.Interfaces;
+using Eshop.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Eshop.Services;
 
-public class ProductService
+public class ProductService : IProductService
 {
     private const string ESHOP_MODE_ENV = "ESHOP_MODE";
     private const string ESHOP_MODE_ENV_DEV = "dev";
     private List<Product> _products = new List<Product>();
 
-    public IEnumerable<Product> Products => _products;
 
     public ProductService()
     {
@@ -17,12 +18,14 @@ public class ProductService
 
     private void InitProducts()
     {
-        // var mode = Environment.GetEnvironmentVariable(ESHOP_MODE_ENV);
+        var mode = Environment.GetEnvironmentVariable(ESHOP_MODE_ENV);
         
-        // if (string.IsNullOrEmpty(mode))
-        //     throw new Exception($"Missing {ESHOP_MODE_ENV}");
+        mode = "dev"; //todo: remove for production XD
         
-        // if (mode == ESHOP_MODE_ENV_DEV)
+        if (string.IsNullOrEmpty(mode))
+            throw new Exception($"Missing {ESHOP_MODE_ENV}");
+        
+        if (mode == ESHOP_MODE_ENV_DEV)
         {
             _products.Add(new Product()
             {
@@ -52,9 +55,14 @@ public class ProductService
             });
             Console.WriteLine("Product added!");
         }
-        // else
-        // {
-        //     Console.WriteLine("No product loaded.");
-        // }
+        else
+        {
+            Console.WriteLine("No product loaded.");
+        }
+    }
+
+    public IEnumerable<Product> GetProducts()
+    {
+        return _products;
     }
 }

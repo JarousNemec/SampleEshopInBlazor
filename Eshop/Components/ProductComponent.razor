@@ -1,6 +1,8 @@
 ﻿@using Eshop.Models
-@using Eshop.Services
-@inject CartService CartService
+@using Eshop.Lib.Interfaces
+@using Microsoft.AspNetCore.Identity
+@inject ICartService CartService
+@inject IHttpContextAccessor Context
 
 <b>@Product.Name</b>
 <img class="img-fluid" src="@Product.ImageLink"/>
@@ -15,7 +17,7 @@
 
     private void AddToCard()
     {
-        CartService.Add(Product, count);
+        CartService.Add(Product, count,Context.HttpContext.User);
     }
 
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Eshop.Components;
 using Eshop.Components.Account;
 using Eshop.Data;
+using Eshop.Lib.Interfaces;
 using Eshop.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,8 +17,8 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-builder.Services.AddSingleton<ProductService>();
-builder.Services.AddSingleton<CartService>();
+builder.Services.AddScoped<IProductService,ProductService>();
+builder.Services.AddScoped<ICartService,CartService>();
 
 builder.Services.AddAuthentication(options =>
     {

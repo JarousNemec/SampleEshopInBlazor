@@ -1,11 +1,14 @@
 ﻿@page "/Cart"
 @using Eshop.Services
-@inject CartService CartService
+@using Eshop.Lib.Interfaces
+@using Microsoft.AspNetCore.Identity
+@inject ICartService CartService
+@inject IHttpContextAccessor Context
 @rendermode InteractiveServer
 
 <h3>Cart</h3>
 <div>
-    @foreach (var item in CartService.Items)
+    @foreach (var item in CartService.GetItems(Context.HttpContext.User))
     {
         <ProductInCartComponent CartItem="item"></ProductInCartComponent>
     }

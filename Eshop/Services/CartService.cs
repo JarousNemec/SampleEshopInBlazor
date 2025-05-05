@@ -13,20 +13,31 @@ public class CartService : ICartService
 {
     public event ICartService.CartChanged? OnAddedItem;
     public event ICartService.CartCommonChanged? OnCartChanged;
-    private StackExchange.Redis.IDatabase _redis;
+    private StackExchange.Redis.IDatabase? _redis;
     private List<ProductInCart> _products = new List<ProductInCart>();
 
     private readonly UserManager<ApplicationUser> _userManager;
-    // public IEnumerable<ProductInCart> Items => _products;
 
-    public CartService(UserManager<ApplicationUser> userManager)
+    // public IEnumerable<ProductInCart> Items => _products;
+    private readonly ConfigurationManager _configuration;
+
+    public CartService(UserManager<ApplicationUser> userManager, ConfigurationManager configurationManager)
     {
         _userManager = userManager;
-        ConnectionMultiplexer connection = ConnectionMultiplexer.Connect("localhost:6379");
+        _configuration = configurationManager;
+        PrepareRedis();
+    }
+
+    private void PrepareRedis()
+    {
+        var redisConnectionString = _configuration.GetConnectionString("RedisConnection");
+        if (redisConnectionString == null)
+            return;
+        ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(redisConnectionString);
         _redis = connection.GetDatabase();
     }
 
-    public void Add(Product product, int count,ClaimsPrincipal user)
+    public void Add(Product product, int count, ClaimsPrincipal user)
     {
         var item = _products.FirstOrDefault(x => x.Product.Id == product.Id);
         if (item == null)
@@ -38,6 +49,7 @@ public class CartService : ICartService
         {
             item.Count += count;
         }
+
         SaveRedisCache(user);
         OnAddedItem?.Invoke(item);
     }
@@ -51,26 +63,25 @@ public class CartService : ICartService
             SaveRedisCache(user);
             OnCartChanged?.Invoke();
         }
-        
     }
 
-    public void ChangeCount(Product product, int count,ClaimsPrincipal user)
+    public void ChangeCount(Product product, int count, ClaimsPrincipal user)
     {
         var item = _products.FirstOrDefault(x => x.Product.Id == product.Id);
         if (item != null)
         {
-            item.Count = count;SaveRedisCache(user);
+            item.Count = count;
+            SaveRedisCache(user);
             OnCartChanged?.Invoke();
         }
-        
     }
 
     public IEnumerable<ProductInCart> GetItems(ClaimsPrincipal user)
     {
         var userId = _userManager.GetUserId(user);
-        if (string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(userId) || _redis == null)
             return _products;
-        string cache = _redis.StringGet(userId);
+        string cache = _redis.StringGet(userId)!;
         if (string.IsNullOrEmpty(cache))
             return _products;
         var data = JsonSerializer.Deserialize<RedisCartCacheModel>(cache);
@@ -82,7 +93,7 @@ public class CartService : ICartService
     private void SaveRedisCache(ClaimsPrincipal user)
     {
         var userId = _userManager.GetUserId(user);
-        if(string.IsNullOrEmpty(userId))
+        if (string.IsNullOrEmpty(userId) || _redis == null)
             return;
         var cacheItem = new RedisCartCacheModel()
         {

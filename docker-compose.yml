@@ -2,10 +2,38 @@ version: "3.6"
 
 services:
   eshop:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: Eshop/Dockerfile
     ports:
-      - "8080:8080"
+      - "10000:8080"
     environment:
       - ESHOP_MODE=dev
+  
+# https://hub.docker.com/_/redis
+  redis:
+    image: redis
+    restart: unless-stopped
+    ports:
+      - "10001:6379"
+        
+# https://hub.docker.com/_/postgres
+  database:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "10002:5432"
+    environment:
+      POSTGRES_PASSWORD: Heslo1234.
+      POSTGRES_USER: Eshop
+      POSTGRES_DB: eshop
+      
+    volumes:
+      - "databaseVolume:/var/lib/postgresql/data"
+    
+volumes:
+  databaseVolume:
+    driver: local
+        
+  
